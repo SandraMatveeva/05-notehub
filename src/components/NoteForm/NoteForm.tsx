@@ -2,14 +2,27 @@ import { useId } from "react";
 import styles from "./NoteForm.module.css";
 import { ErrorMessage, Field, Form, Formik } from "formik";
 import * as Yup from "yup";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { createNote } from "../../services/noteService";
+
 
 interface NoteFormProps {
   onClose: () => void;
-  onCreate: (data: { title: string; content: string; tag: string }) => void;
+  // onCreate: (data: { title: string; content: string; tag: string }) => void;
 }
 
-export default function NoteForm({ onClose, onCreate }: NoteFormProps) {
+export default function NoteForm({ onClose }: NoteFormProps) {
   const fieldId = useId();
+
+const queryClient = useQueryClient();
+
+   const createMutation = useMutation({
+    mutationFn: createNote,
+    onSuccess: () => {
+     queryClient.invalidateQueries({ queryKey: ["notes"] });
+      onClose();
+    },
+  });
 
   const OrderFormSchema = Yup.object().shape({
     title: Yup.string()
@@ -17,6 +30,9 @@ export default function NoteForm({ onClose, onCreate }: NoteFormProps) {
       .max(50, "Title is too long")
       .required("Title is required"),
     content: Yup.string().max(500, "Content is too long"),
+    tag: Yup.string()
+    .oneOf(["Todo", "Work", "Personal", "Meeting", "Shopping"], "Invalid tag")
+    .required("Tag is required"),
   });
 
   return (
@@ -24,10 +40,11 @@ export default function NoteForm({ onClose, onCreate }: NoteFormProps) {
       initialValues={{ title: "", content: "", tag: "Todo" }}
       validationSchema={OrderFormSchema}
       onSubmit={(values) => {
+        createMutation.mutate(values);
         console.log(values);
 
-        onCreate(values);
-        onClose();
+        // onCreate(values);
+        // onClose();
       }}
     >
       {({ isValid, dirty }) =>(
@@ -96,7 +113,7 @@ export default function NoteForm({ onClose, onCreate }: NoteFormProps) {
           <button
             type="submit"
             className={styles.submitButton}
-            disabled={!isValid || !dirty}
+            disabled={!isValid || !dirty }
           >
             Create note
           </button>

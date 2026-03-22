@@ -20,23 +20,34 @@ export async function fetchNotes(search: string, page: number): Promise<Response
   return result.data;
 }
 
-export async function createNote(note: Partial<Note>): Promise<ResponseResult> {
-  const response = await axios.post<ResponseResult>(
+type CreateNoteData = {
+  title: string;
+  content: string;
+  tag: string;
+};
+
+export async function createNote(data: CreateNoteData): Promise<Note> {
+  const response = await axios.post<Note>(
     `https://notehub-public.goit.study/api/notes`,
-    note,
+    data,
     {
       headers: {
         accept: "application/json",
         Authorization: `Bearer ${import.meta.env.VITE_NOTEHUB_TOKEN}`,
+        
       },
+      
     },
   );
 
   return response.data;
+  
 }
 
-export async function deleteNote(id: string): Promise<ResponseResult> {
-  const response = await axios.delete<ResponseResult>(
+console.log("TOKEN:", import.meta.env.VITE_NOTEHUB_TOKEN);
+
+export async function deleteNote(id: string): Promise<Note> {
+  const response = await axios.delete<Note>(
     `https://notehub-public.goit.study/api/notes/${id}`,
     {
       headers: {

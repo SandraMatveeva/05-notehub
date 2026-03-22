@@ -44,7 +44,7 @@ export async function createNote(data: CreateNoteData): Promise<Note> {
   
 }
 
-console.log("TOKEN:", import.meta.env.VITE_NOTEHUB_TOKEN);
+
 
 export async function deleteNote(id: string): Promise<Note> {
   const response = await axios.delete<Note>(
